@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { format, parseISO } from "date-fns";
-import "../styles/dashboard.css"; // separate CSS file
+import "../styles/dashboard.css"; 
 
 export default function Dashboard() {
   const { user, logout } = useContext(AuthContext);
@@ -14,11 +14,18 @@ export default function Dashboard() {
 
   const API_URL = `https://rahulshetye.onrender.com/api/tasks`;
 
+  // ✅ Get token from localStorage
+  const getToken = () => localStorage.getItem("token");
 
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL, { credentials: "include" });
+      const res = await fetch(API_URL, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
       const data = await res.json();
       setTasks(data.tasks || []);
     } catch (err) {
@@ -39,8 +46,10 @@ export default function Dashboard() {
     try {
       const res = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
         body: JSON.stringify({ title: newTask }),
       });
       const data = await res.json();
@@ -53,7 +62,10 @@ export default function Dashboard() {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`${API_URL}/${id}`, { method: "DELETE", credentials: "include" });
+      await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       setTasks((prev) => prev.filter((t) => t._id !== id));
     } catch (err) {
       console.error("Failed to delete task:", err);
@@ -64,8 +76,10 @@ export default function Dashboard() {
     try {
       const res = await fetch(`${API_URL}/${task._id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
         body: JSON.stringify({ completed: !task.completed }),
       });
       const data = await res.json();
@@ -91,7 +105,7 @@ export default function Dashboard() {
     { name: "Pending", value: pendingCount },
   ];
 
-  const COLORS = ["#34D399", "#FBBF24"]; // green and yellow
+  const COLORS = ["#34D399", "#FBBF24"]; 
 
   const tasksPerDay = () => {
     const map = {};
@@ -110,15 +124,12 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      {/* Header */}
       <div className="dashboard-header">
         <h1>Dashboard</h1>
-        <button onClick={logout}>Logout</button>
+        <button onClick={() => { logout(); localStorage.removeItem("token"); }}>Logout</button>
       </div>
 
-      {/* Profile + Stats Grid */}
       <div className="grid-container">
-        {/* Profile Card */}
         <div className="profile-card">
           <div className="avatar">
             <img src={`https://ui-avatars.com/api/?name=${user?.name}`} alt="avatar" />
@@ -128,7 +139,6 @@ export default function Dashboard() {
           <p className="welcome-text">Welcome back!</p>
         </div>
 
-        {/* Stats Cards */}
         <div className="stat-card total-tasks">
           <h2>Total Tasks</h2>
           <p>{tasks.length}</p>
@@ -143,9 +153,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Charts */}
       <div className="charts-grid">
-        {/* Pie Chart */}
         <div className="chart-card">
           <h2>Task Status Pie</h2>
           <ResponsiveContainer width="100%" height={250}>
@@ -168,39 +176,34 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
 
-       {/* Simple Tasks Bar Chart */}
-<div className="chart-card bg-white p-4 rounded-lg shadow mb-6">
-  <h2 className="text-xl font-semibold mb-2">Tasks Overview</h2>
-  <ResponsiveContainer width="100%" height={250}>
-  <BarChart
-    data={[
-      { name: "Completed", count: tasks.filter(t => t.completed).length },
-      { name: "Pending", count: tasks.filter(t => !t.completed).length },
-    ]}
-  >
-    <XAxis dataKey="name" />
-    <YAxis allowDecimals={false} />
-    <Tooltip />
-    <Bar dataKey="count">
-      {[
-        { name: "Completed", count: tasks.filter(t => t.completed).length },
-        { name: "Pending", count: tasks.filter(t => !t.completed).length },
-      ].map((entry, index) => (
-        <Cell
-          key={`cell-${index}`}
-          fill={entry.name === "Completed" ? "#34D399" : "#FBBF24"} // green for completed, yellow for pending
-        />
-      ))}
-    </Bar>
-  </BarChart>
-</ResponsiveContainer>
-
-</div>
-
-
+        <div className="chart-card bg-white p-4 rounded-lg shadow mb-6">
+          <h2 className="text-xl font-semibold mb-2">Tasks Overview</h2>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart
+              data={[
+                { name: "Completed", count: completedCount },
+                { name: "Pending", count: pendingCount },
+              ]}
+            >
+              <XAxis dataKey="name" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Bar dataKey="count">
+                {[
+                  { name: "Completed", count: completedCount },
+                  { name: "Pending", count: pendingCount },
+                ].map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.name === "Completed" ? "#34D399" : "#FBBF24"}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
-      {/* Add Task */}
       <div className="add-task-card">
         <h2>Add Task</h2>
         <form onSubmit={handleAddTask}>
@@ -214,7 +217,6 @@ export default function Dashboard() {
         </form>
       </div>
 
-      {/* Task List */}
       <ul className="task-list">
         {filteredTasks.map((task) => (
           <li key={task._id} className={task.completed ? "task-completed" : "task-pending"}>

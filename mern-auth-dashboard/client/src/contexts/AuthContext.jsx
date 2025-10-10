@@ -27,36 +27,26 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const loginUser = async (data) => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-        credentials: "include",
-      });
-      const result = await res.json();
-      if (!res.ok) throw result;
-      setUser(result.user);
-      return result;
-    } catch (err) {
-      throw err;
-    }
-  };
+const loginUser = async (data) => {
+  const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  const result = await res.json();
+  if (!res.ok) throw result;
 
-  const logoutUser = async () => {
-    try {
-      await fetch(`${BACKEND_URL}/api/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch (err) {
-      console.error("Logout failed:", err);
-    } finally {
-      setUser(null);
-      // window.location.href = "/login"; // optional
-    }
-  };
+  // Save token for later requests
+  localStorage.setItem("token", result.token);
+  setUser(result.user);
+  return result;
+};
+
+const logoutUser = async () => {
+  localStorage.removeItem("token");
+  setUser(null);
+};
+
 
   useEffect(() => {
     const fetchProfile = async () => {
