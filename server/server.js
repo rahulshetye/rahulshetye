@@ -21,8 +21,8 @@ app.use(morgan("dev"));
 
 // CORS configuration
 const allowedOrigins = [
-  "http://localhost:5173", // local dev
-  "https://rahulshetyetask.vercel.app", // deployed frontend
+  "http://localhost:5173",
+  "https://rahulshetyetask.vercel.app",
 ];
 
 app.use(
@@ -39,9 +39,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-// Handle OPTIONS preflight requests properly
-app.options("/api/*", cors());
 
 // Rate limiting
 app.use(rateLimit({ windowMs: 60 * 1000, max: 100 }));
