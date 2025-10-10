@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
-import API from "../utils/api";
+import API from "../api";
 import {
   BarChart,
   Bar,
