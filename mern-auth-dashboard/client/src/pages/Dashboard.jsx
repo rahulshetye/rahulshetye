@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import API from "../api";
-import "./dashboard.css";
+import "../styles/dashboard.css"; // 👈 Import external styles
 
 export default function Dashboard() {
   const { user, logout, loading: authLoading } = useContext(AuthContext);
