@@ -7,51 +7,116 @@
   @apply min-h-screen bg-gray-100 p-6;
 }
 
-/* Header inside dashboard-container */
-.dashboard-container h1 {
-  @apply text-3xl font-bold text-blue-600 mb-4;
+/* Header */
+.dashboard-header {
+  @apply flex justify-between items-center mb-6 bg-white shadow p-4 rounded-lg;
 }
-.dashboard-container button {
+.dashboard-header h1 {
+  @apply text-3xl font-bold text-blue-600;
+}
+.dashboard-header button {
   @apply bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition;
 }
 
-/* Add Task Form */
-.dashboard-container form {
-  @apply flex gap-2 mb-6;
+/* Grid for profile + stats */
+.grid-container {
+  @apply grid grid-cols-1 md:grid-cols-4 gap-4 mb-6;
 }
-.dashboard-container input {
+
+/* Profile Card */
+.profile-card {
+  @apply bg-white rounded-lg shadow p-4 flex flex-col items-center text-center;
+}
+.profile-card .avatar {
+  @apply w-24 h-24 rounded-full overflow-hidden mb-3;
+}
+.profile-card .avatar img {
+  @apply w-full h-full object-cover;
+}
+.profile-card h2 {
+  @apply text-xl font-semibold;
+}
+.profile-card p {
+  @apply text-gray-500;
+}
+.profile-card .welcome-text {
+  @apply mt-2 text-sm text-gray-400;
+}
+
+/* Stats Cards */
+.stat-card {
+  @apply text-white p-4 rounded-lg shadow flex flex-col items-center justify-center;
+}
+.total-tasks {
+  @apply bg-gradient-to-r from-blue-500 to-indigo-600;
+}
+.completed-tasks {
+  @apply bg-gradient-to-r from-green-400 to-green-600;
+}
+.pending-tasks {
+  @apply bg-gradient-to-r from-yellow-400 to-yellow-600;
+}
+.stat-card h2 {
+  @apply text-xl font-semibold;
+}
+.stat-card p {
+  @apply text-3xl font-bold mt-2;
+}
+
+/* Charts Grid */
+.charts-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6 mb-6;
+}
+.chart-card {
+  @apply bg-white rounded-lg shadow p-4;
+}
+.chart-card h2 {
+  @apply text-xl font-semibold mb-2;
+}
+
+/* Add Task Card */
+.add-task-card {
+  @apply bg-white rounded-lg shadow p-4 mb-6;
+}
+.add-task-card h2 {
+  @apply text-xl font-semibold mb-2;
+}
+.add-task-card form {
+  @apply flex gap-2;
+}
+.add-task-card input {
   @apply flex-1 p-2 border rounded;
 }
-.dashboard-container button[type="submit"] {
+.add-task-card button {
   @apply bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition;
 }
 
 /* Task List */
-.dashboard-container ul {
+.task-list {
   @apply space-y-3;
 }
-.dashboard-container li {
+.task-list li {
   @apply p-3 rounded shadow flex flex-col transition hover:scale-[1.02] duration-300;
 }
-
-/* Match JSX class 'completed' */
-.dashboard-container li.completed {
+/* Map JSX class names to Tailwind styles */
+.task-completed {
   @apply bg-green-500 text-white;
 }
-.dashboard-container li:not(.completed) {
+.task-pending {
   @apply bg-yellow-300 text-black;
 }
-
-/* Task title and actions */
-.dashboard-container li span {
+.task-title {
   @apply font-semibold px-2 py-1 rounded-t;
 }
-.dashboard-container li button {
-  @apply px-3 py-1 rounded text-white font-semibold transition hover:opacity-80 mt-2;
+.task-actions {
+  @apply mt-2 flex gap-2;
 }
-.dashboard-container li button:first-child {
+.task-actions button {
+  @apply px-3 py-1 rounded text-white font-semibold transition hover:opacity-80;
+}
+.task-actions button:first-child {
   @apply bg-blue-600 hover:bg-blue-700;
 }
-.dashboard-container li button:last-child {
+.task-actions button:last-child {
   @apply bg-red-600 hover:bg-red-700;
 }
