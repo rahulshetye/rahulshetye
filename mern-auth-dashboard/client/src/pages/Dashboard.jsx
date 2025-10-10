@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import API from "../api";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { format, parseISO } from "date-fns";
 import "../styles/dashboard.css";
 
 export default function Dashboard() {
@@ -66,21 +65,11 @@ export default function Dashboard() {
     { name: "Completed", value: completedCount },
     { name: "Pending", value: pendingCount },
   ];
+  const barData = [
+    { name: "Completed", count: completedCount },
+    { name: "Pending", count: pendingCount },
+  ];
   const COLORS = ["#34D399", "#FBBF24"];
-
-  const tasksPerDay = () => {
-    const map = {};
-    tasks.forEach((task) => {
-      if (task.completed && task.updatedAt) {
-        const day = format(parseISO(task.updatedAt), "yyyy-MM-dd");
-        map[day] = (map[day] || 0) + 1;
-      }
-    });
-    return Object.keys(map)
-      .sort()
-      .map((date) => ({ date, completed: map[date] }));
-  };
-  const taskTrendData = tasksPerDay();
 
   return (
     <div className="dashboard-container">
@@ -120,7 +109,7 @@ export default function Dashboard() {
       <div className="charts-grid">
         {/* Pie Chart */}
         <div className="chart-card">
-          <h2>Task Status</h2>
+          <h2>Task Status Pie</h2>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
@@ -135,13 +124,17 @@ export default function Dashboard() {
 
         {/* Bar Chart */}
         <div className="chart-card">
-          <h2>Tasks Completed Over Time</h2>
+          <h2>Task Status Overview</h2>
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={taskTrendData}>
-              <XAxis dataKey="date" />
+            <BarChart data={barData}>
+              <XAxis dataKey="name" />
               <YAxis allowDecimals={false} />
               <Tooltip />
-              <Bar dataKey="completed" fill="#34D399" />
+              <Bar dataKey="count">
+                {barData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>

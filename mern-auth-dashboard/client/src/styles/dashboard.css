@@ -100,10 +100,10 @@
 }
 /* Map JSX class names to Tailwind styles */
 .task-completed {
-  @apply bg-green-500 text-white;
+  @apply bg-gradient-to-r from-green-400 to-green-600 text-white;
 }
 .task-pending {
-  @apply bg-yellow-300 text-black;
+  @apply bg-gradient-to-r from-yellow-300 to-yellow-500 text-black;
 }
 .task-title {
   @apply font-semibold px-2 py-1 rounded-t;
@@ -115,8 +115,8 @@
   @apply px-3 py-1 rounded text-white font-semibold transition hover:opacity-80;
 }
 .task-actions button:first-child {
-  @apply bg-blue-600 hover:bg-blue-700;
+  @apply bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800;
 }
 .task-actions button:last-child {
-  @apply bg-red-600 hover:bg-red-700;
+  @apply bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800;
 }
