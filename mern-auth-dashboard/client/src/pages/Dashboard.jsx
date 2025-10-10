@@ -1,6 +1,16 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 import { format, parseISO } from "date-fns";
 import "../styles/dashboard.css";
 
@@ -12,11 +22,16 @@ export default function Dashboard() {
   const [filterCompleted, setFilterCompleted] = useState("all");
   const [loading, setLoading] = useState(true);
 
-  const API_URL = "https://rahulshetye.onrender.com/api/tasks";
+  const API_URL = `https://rahulshetye.onrender.com/api/tasks`;
 
   const getToken = () => localStorage.getItem("token");
 
-  // --- Fetch tasks ---
+  const handleUnauthorized = () => {
+    console.warn("Unauthorized - logging out");
+    logout();
+    localStorage.removeItem("token");
+  };
+
   const fetchTasks = async () => {
     setLoading(true);
     try {
@@ -26,6 +41,9 @@ export default function Dashboard() {
           Authorization: `Bearer ${getToken()}`,
         },
       });
+
+      if (res.status === 401) return handleUnauthorized();
+
       const data = await res.json();
       setTasks(data.tasks || []);
     } catch (err) {
@@ -36,10 +54,9 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    if (getToken()) fetchTasks();
+    fetchTasks();
   }, []);
 
-  // --- Add task ---
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (!newTask.trim()) return;
@@ -53,28 +70,32 @@ export default function Dashboard() {
         },
         body: JSON.stringify({ title: newTask }),
       });
+
+      if (res.status === 401) return handleUnauthorized();
+
       const data = await res.json();
-      if (res.ok && data.task) setTasks((prev) => [data.task, ...prev]);
+      setTasks((prev) => [data.task, ...prev]);
       setNewTask("");
     } catch (err) {
       console.error("Failed to add task:", err);
     }
   };
 
-  // --- Delete task ---
   const handleDelete = async (id) => {
     try {
-      await fetch(`${API_URL}/${id}`, {
+      const res = await fetch(`${API_URL}/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${getToken()}` },
       });
+
+      if (res.status === 401) return handleUnauthorized();
+
       setTasks((prev) => prev.filter((t) => t._id !== id));
     } catch (err) {
       console.error("Failed to delete task:", err);
     }
   };
 
-  // --- Toggle completed ---
   const handleToggle = async (task) => {
     try {
       const res = await fetch(`${API_URL}/${task._id}`, {
@@ -85,18 +106,23 @@ export default function Dashboard() {
         },
         body: JSON.stringify({ completed: !task.completed }),
       });
+
+      if (res.status === 401) return handleUnauthorized();
+
       const data = await res.json();
-      if (res.ok && data.task) {
-        setTasks((prev) => prev.map((t) => (t._id === task._id ? data.task : t)));
-      }
+      setTasks((prev) => prev.map((t) => (t._id === task._id ? data.task : t)));
     } catch (err) {
       console.error("Failed to update task:", err);
     }
   };
 
   const filteredTasks = tasks
-    .filter((t) => (filterCompleted === "completed" ? t.completed : filterCompleted === "pending" ? !t.completed : true))
-    .filter((t) => t.title?.toLowerCase().includes(search.toLowerCase()));
+    .filter((t) => {
+      if (filterCompleted === "completed") return t.completed;
+      if (filterCompleted === "pending") return !t.completed;
+      return true;
+    })
+    .filter((t) => t.title.toLowerCase().includes(search.toLowerCase()));
 
   const completedCount = tasks.filter((t) => t.completed).length;
   const pendingCount = tasks.filter((t) => !t.completed).length;
@@ -105,6 +131,7 @@ export default function Dashboard() {
     { name: "Completed", value: completedCount },
     { name: "Pending", value: pendingCount },
   ];
+
   const COLORS = ["#34D399", "#FBBF24"];
 
   const tasksPerDay = () => {
@@ -115,7 +142,9 @@ export default function Dashboard() {
         map[day] = (map[day] || 0) + 1;
       }
     });
-    return Object.keys(map).sort().map((date) => ({ date, completed: map[date] }));
+    return Object.keys(map)
+      .sort()
+      .map((date) => ({ date, completed: map[date] }));
   };
 
   return (
@@ -174,7 +203,12 @@ export default function Dashboard() {
         <div className="chart-card bg-white p-4 rounded-lg shadow mb-6">
           <h2 className="text-xl font-semibold mb-2">Tasks Overview</h2>
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={[{ name: "Completed", count: completedCount }, { name: "Pending", count: pendingCount }]}>
+            <BarChart
+              data={[
+                { name: "Completed", count: completedCount },
+                { name: "Pending", count: pendingCount },
+              ]}
+            >
               <XAxis dataKey="name" />
               <YAxis allowDecimals={false} />
               <Tooltip />
@@ -200,15 +234,21 @@ export default function Dashboard() {
       </div>
 
       <ul className="task-list">
-        {filteredTasks.map((task) => (
-          <li key={task._id} className={task.completed ? "task-completed" : "task-pending"}>
-            <div className="task-title">{task.title}</div>
-            <div className="task-actions">
-              <button onClick={() => handleToggle(task)}>{task.completed ? "Turn Pending" : "Turn Complete"}</button>
-              <button onClick={() => handleDelete(task._id)}>Delete</button>
-            </div>
-          </li>
-        ))}
+        {filteredTasks.length > 0 ? (
+          filteredTasks.map((task) => (
+            <li key={task._id} className={task.completed ? "task-completed" : "task-pending"}>
+              <div className="task-title">{task.title}</div>
+              <div className="task-actions">
+                <button onClick={() => handleToggle(task)}>
+                  {task.completed ? "Turn Pending" : "Turn Complete"}
+                </button>
+                <button onClick={() => handleDelete(task._id)}>Delete</button>
+              </div>
+            </li>
+          ))
+        ) : (
+          <p>No tasks available</p>
+        )}
       </ul>
     </div>
   );

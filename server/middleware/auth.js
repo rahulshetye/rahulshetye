@@ -3,24 +3,24 @@ const jwt = require('jsonwebtoken');
 
 /**
  * Middleware to protect routes.
- * Checks for JWT in cookies or Authorization header.
+ * Expects a Bearer token in Authorization header.
  */
 module.exports = function (req, res, next) {
-  // Get token from cookies or Authorization header
-  const token =
-    req.cookies?.token ||
-    (req.header('Authorization') ? req.header('Authorization').split(' ')[1] : null);
-
-  if (!token) {
+  // Get token from Authorization header
+  const authHeader = req.header('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ msg: 'No token, authorization denied' });
   }
+
+  const token = authHeader.split(' ')[1];
 
   try {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded.user; // Attach user payload to request
+    req.user = decoded.user; // attach user payload
     next();
   } catch (err) {
+    console.error('JWT verification failed:', err.message);
     res.status(401).json({ msg: 'Token is not valid' });
   }
 };

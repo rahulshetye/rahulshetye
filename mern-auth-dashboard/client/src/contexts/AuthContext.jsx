@@ -7,52 +7,39 @@ const BACKEND_URL = import.meta.env.VITE_API_URL || "https://rahulshetye.onrende
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  // --- Register user ---
   const registerUser = async (data) => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-      if (!res.ok) throw result;
-      // Save token
-      localStorage.setItem("token", result.token);
-      setUser(result.user);
-      return result;
-    } catch (err) {
-      throw err;
-    }
+    const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw result;
+
+    localStorage.setItem("token", result.token);
+    setUser(result.user);
+    return result;
   };
 
-  // --- Login user ---
   const loginUser = async (data) => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-      if (!res.ok) throw result;
+    const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw result;
 
-      // Save token for future requests
-      localStorage.setItem("token", result.token);
-      setUser(result.user);
-      return result;
-    } catch (err) {
-      throw err;
-    }
+    localStorage.setItem("token", result.token);
+    setUser(result.user);
+    return result;
   };
 
-  // --- Logout user ---
   const logoutUser = () => {
     localStorage.removeItem("token");
     setUser(null);
   };
 
-  // --- Fetch user profile on mount ---
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("token");
@@ -62,8 +49,11 @@ export function AuthProvider({ children }) {
         const res = await fetch(`${BACKEND_URL}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
+        if (res.status === 401) return logoutUser();
+
         const data = await res.json();
-        if (res.ok && data.user) setUser(data.user);
+        if (res.ok) setUser(data.user);
         else setUser(null);
       } catch {
         setUser(null);
@@ -74,14 +64,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        registerUser,
-        loginUser,
-        logout: logoutUser,
-      }}
-    >
+    <AuthContext.Provider value={{ user, registerUser, loginUser, logout: logoutUser }}>
       {children}
     </AuthContext.Provider>
   );
