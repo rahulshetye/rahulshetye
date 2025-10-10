@@ -20,10 +20,7 @@ app.use(cookieParser());
 app.use(morgan("dev"));
 
 // CORS configuration
-const allowedOrigins = [
-  
-  "https://rahulshetyetask.vercel.app"
-];
+const allowedOrigins = "https://rahulshetyetask.vercel.app";
 
 app.use(
   cors({
