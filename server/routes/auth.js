@@ -71,9 +71,15 @@ router.post(
       const payload = { user: { id: user.id } };
       const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-      res
-        .cookie('token', token, COOKIE_OPTS)
-        .json({ user: { id: user.id, name: user.name, email: user.email } });
+     res
+  .cookie("token", token, {
+    httpOnly: true,
+    secure: true,           // must match HTTPS in production
+    sameSite: "None",       // cross-site allowed
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  })
+  .json({ user: { id: user.id, name: user.name, email: user.email } });
+
     } catch (err) {
       console.error(err.message);
       res.status(500).send('Server error');

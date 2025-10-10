@@ -23,34 +23,53 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   // Fetch tasks
-  const fetchTasks = async () => {
-    setLoading(true);
-    try {
-      const res = await API.get("/api/tasks");
-      setTasks(res.data.tasks || []);
-    } catch (err) {
-      console.error("Failed to fetch tasks:", err);
-    } finally {
-      setLoading(false);
+// ---------------- Fetch Tasks ----------------
+const fetchTasks = async () => {
+  setLoading(true);
+  try {
+    const res = await fetch(API_URL, { 
+      credentials: "include" // ✅ This sends the cookie
+    });
+    if (res.status === 401) {
+      console.error("Unauthorized access");
+      return;
     }
-  };
+    const data = await res.json();
+    setTasks(data.tasks || []);
+  } catch (err) {
+    console.error("Failed to fetch tasks:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     if (!authLoading) fetchTasks();
   }, [authLoading]);
 
   // Add task
-  const handleAddTask = async (e) => {
-    e.preventDefault();
-    if (!newTask.trim()) return;
-    try {
-      const res = await API.post("/api/tasks", { title: newTask });
-      setTasks((prev) => [res.data.task, ...prev]);
-      setNewTask("");
-    } catch (err) {
-      console.error("Failed to add task:", err);
-    }
-  };
+const handleAddTask = async (e) => {
+  e.preventDefault();
+  if (!newTask.trim()) return;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include", // ✅ This is essential
+      body: JSON.stringify({ title: newTask }),
+    });
+
+    if (res.status === 401) return console.error("Unauthorized");
+
+    const data = await res.json();
+    setTasks((prev) => [data.task, ...prev]);
+    setNewTask("");
+  } catch (err) {
+    console.error("Failed to add task:", err);
+  }
+};
 
   // Delete task
   const handleDelete = async (id) => {
