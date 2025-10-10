@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Container with abstract gradient background */
+.login-container {
+  @apply min-h-screen flex items-center justify-center relative overflow-hidden p-6;
+  background: radial-gradient(circle at 30% 40%, #ffb347, #ffcc33, #ff6f61 40%, transparent 60%),
+              radial-gradient(circle at 70% 60%, #0099cc, #66ccff 40%, transparent 60%),
+              radial-gradient(circle at 50% 80%, #8e44ad, #3498db 50%, transparent 70%),
+              linear-gradient(120deg, #ff9a9e, #fad0c4 50%, #a18cd1 90%);
+  background-blend-mode: screen, overlay, multiply, normal;
+}
+
+/* Optional dark overlay for text readability */
+.login-container::before {
+  content: "";
+  @apply absolute inset-0 bg-black opacity-30;
+  z-index: 0;
+}
+
+/* Login / Register Card */
+.login-card {
+  @apply relative bg-white shadow-2xl rounded-3xl w-full max-w-md p-10 transform transition duration-500 hover:scale-[1.03] z-10;
+}
+
+/* Card Title & Subtitle */
+.login-title {
+  @apply text-4xl font-extrabold text-gray-800 text-center mb-2;
+}
+
+.login-subtitle {
+  @apply text-gray-500 text-center mb-8;
+}
+
+/* Form Styling */
+.login-form {
+  @apply space-y-5;
+}
+
+.form-group {
+  @apply flex flex-col relative;
+}
+
+.input-field {
+  @apply w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition duration-300;
+}
+
+.input-field:focus {
+  @apply shadow-lg;
+}
+
+/* Error Styling */
+.error-border {
+  @apply border-red-500;
+}
+
+.error-text {
+  @apply text-red-500 text-sm mt-1;
+}
+
+/* Button Styling */
+.login-button {
+  @apply w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 text-white font-semibold rounded-xl transition duration-300 shadow-lg;
+}
+
+/* Register Text / Link */
+.register-text {
+  @apply text-center text-black text-sm mt-6;
+}
+
+.register-link {
+  @apply text-blue-700 font-semibold hover:underline;
+}
