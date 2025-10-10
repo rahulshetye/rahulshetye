@@ -21,8 +21,8 @@ app.use(morgan("dev"));
 
 // CORS configuration
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://rahulshetyetask.vercel.app",
+  
+  "https://rahulshetyetask.vercel.app"
 ];
 
 app.use(
