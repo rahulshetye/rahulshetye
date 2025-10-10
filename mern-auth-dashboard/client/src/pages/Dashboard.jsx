@@ -24,26 +24,15 @@ export default function Dashboard() {
 
   const API_URL = `https://rahulshetye.onrender.com/api/tasks`;
 
-  const getToken = () => localStorage.getItem("token");
-
-  const handleUnauthorized = () => {
-    console.warn("Unauthorized - logging out");
-    logout();
-    localStorage.removeItem("token");
-  };
-
+  // ---------------- Fetch Tasks ----------------
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
-
-      if (res.status === 401) return handleUnauthorized();
-
+      const res = await fetch(API_URL, { credentials: "include" });
+      if (res.status === 401) {
+        console.error("Unauthorized access");
+        return;
+      }
       const data = await res.json();
       setTasks(data.tasks || []);
     } catch (err) {
@@ -57,6 +46,7 @@ export default function Dashboard() {
     fetchTasks();
   }, []);
 
+  // ---------------- Add Task ----------------
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (!newTask.trim()) return;
@@ -64,14 +54,12 @@ export default function Dashboard() {
     try {
       const res = await fetch(API_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ title: newTask }),
       });
 
-      if (res.status === 401) return handleUnauthorized();
+      if (res.status === 401) return console.error("Unauthorized");
 
       const data = await res.json();
       setTasks((prev) => [data.task, ...prev]);
@@ -81,14 +69,15 @@ export default function Dashboard() {
     }
   };
 
+  // ---------------- Delete Task ----------------
   const handleDelete = async (id) => {
     try {
       const res = await fetch(`${API_URL}/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${getToken()}` },
+        credentials: "include",
       });
 
-      if (res.status === 401) return handleUnauthorized();
+      if (res.status === 401) return console.error("Unauthorized");
 
       setTasks((prev) => prev.filter((t) => t._id !== id));
     } catch (err) {
@@ -96,26 +85,28 @@ export default function Dashboard() {
     }
   };
 
+  // ---------------- Toggle Task ----------------
   const handleToggle = async (task) => {
     try {
       const res = await fetch(`${API_URL}/${task._id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ completed: !task.completed }),
       });
 
-      if (res.status === 401) return handleUnauthorized();
+      if (res.status === 401) return console.error("Unauthorized");
 
       const data = await res.json();
-      setTasks((prev) => prev.map((t) => (t._id === task._id ? data.task : t)));
+      setTasks((prev) =>
+        prev.map((t) => (t._id === task._id ? data.task : t))
+      );
     } catch (err) {
       console.error("Failed to update task:", err);
     }
   };
 
+  // ---------------- Filtered Tasks ----------------
   const filteredTasks = tasks
     .filter((t) => {
       if (filterCompleted === "completed") return t.completed;
@@ -132,7 +123,7 @@ export default function Dashboard() {
     { name: "Pending", value: pendingCount },
   ];
 
-  const COLORS = ["#34D399", "#FBBF24"];
+  const COLORS = ["#34D399", "#FBBF24"]; // green / yellow
 
   const tasksPerDay = () => {
     const map = {};
@@ -147,6 +138,8 @@ export default function Dashboard() {
       .map((date) => ({ date, completed: map[date] }));
   };
 
+  const taskTrendData = tasksPerDay();
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
@@ -154,7 +147,6 @@ export default function Dashboard() {
         <button
           onClick={() => {
             logout();
-            localStorage.removeItem("token");
           }}
         >
           Logout
@@ -164,7 +156,10 @@ export default function Dashboard() {
       <div className="grid-container">
         <div className="profile-card">
           <div className="avatar">
-            <img src={`https://ui-avatars.com/api/?name=${user?.name}`} alt="avatar" />
+            <img
+              src={`https://ui-avatars.com/api/?name=${user?.name}`}
+              alt="avatar"
+            />
           </div>
           <h2>{user?.name}</h2>
           <p>{user?.email}</p>
@@ -190,9 +185,20 @@ export default function Dashboard() {
           <h2>Task Status Pie</h2>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
-              <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+              <Pie
+                data={pieData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                label
+              >
                 {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip />
@@ -217,7 +223,10 @@ export default function Dashboard() {
                   { name: "Completed", count: completedCount },
                   { name: "Pending", count: pendingCount },
                 ].map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.name === "Completed" ? "#34D399" : "#FBBF24"} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.name === "Completed" ? "#34D399" : "#FBBF24"}
+                  />
                 ))}
               </Bar>
             </BarChart>
@@ -228,27 +237,31 @@ export default function Dashboard() {
       <div className="add-task-card">
         <h2>Add Task</h2>
         <form onSubmit={handleAddTask}>
-          <input type="text" value={newTask} onChange={(e) => setNewTask(e.target.value)} placeholder="Task title" />
+          <input
+            type="text"
+            value={newTask}
+            onChange={(e) => setNewTask(e.target.value)}
+            placeholder="Task title"
+          />
           <button type="submit">Add</button>
         </form>
       </div>
 
       <ul className="task-list">
-        {filteredTasks.length > 0 ? (
-          filteredTasks.map((task) => (
-            <li key={task._id} className={task.completed ? "task-completed" : "task-pending"}>
-              <div className="task-title">{task.title}</div>
-              <div className="task-actions">
-                <button onClick={() => handleToggle(task)}>
-                  {task.completed ? "Turn Pending" : "Turn Complete"}
-                </button>
-                <button onClick={() => handleDelete(task._id)}>Delete</button>
-              </div>
-            </li>
-          ))
-        ) : (
-          <p>No tasks available</p>
-        )}
+        {filteredTasks.map((task) => (
+          <li
+            key={task._id}
+            className={task.completed ? "task-completed" : "task-pending"}
+          >
+            <div className="task-title">{task.title}</div>
+            <div className="task-actions">
+              <button onClick={() => handleToggle(task)}>
+                {task.completed ? "Turn Pending" : "Turn Complete"}
+              </button>
+              <button onClick={() => handleDelete(task._id)}>Delete</button>
+            </div>
+          </li>
+        ))}
       </ul>
     </div>
   );
