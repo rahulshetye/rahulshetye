@@ -6,13 +6,15 @@ const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 
-// ✅ Updated cookie settings for cross-site
+const isProduction = process.env.NODE_ENV === "production";
+
 const COOKIE_OPTS = {
   httpOnly: true,
-  secure: true,          // Always true on Vercel/Render (HTTPS)
-  sameSite: 'none',      // Needed for cross-origin cookies
-  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  secure: isProduction,           // must be true on HTTPS
+  sameSite: isProduction ? "None" : "Lax",
+  maxAge: 1000 * 60 * 60,        // 1 hour
 };
+
 
 // =================== REGISTER ===================
 router.post(
