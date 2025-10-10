@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import API from "../api";
+import "./Dashboard.css";
 
 export default function Dashboard() {
   const { user, logout, loading: authLoading } = useContext(AuthContext);
