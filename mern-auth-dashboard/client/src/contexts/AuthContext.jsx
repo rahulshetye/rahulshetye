@@ -1,70 +1,48 @@
 import { createContext, useState, useEffect } from "react";
+import API from "../utils/api";
 
 export const AuthContext = createContext();
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || "https://rahulshetye.onrender.com";
-
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const registerUser = async (data) => {
-    const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    const result = await res.json();
-    if (!res.ok) throw result;
-
-    localStorage.setItem("token", result.token);
-    setUser(result.user);
-    return result;
-  };
-
-  const loginUser = async (data) => {
-    const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    const result = await res.json();
-    if (!res.ok) throw result;
-
-    localStorage.setItem("token", result.token);
-    setUser(result.user);
-    return result;
-  };
-
-  const logoutUser = () => {
-    localStorage.removeItem("token");
-    setUser(null);
-  };
-
+  // Fetch current user on mount
   useEffect(() => {
     const fetchProfile = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) return setUser(null);
-
       try {
-        const res = await fetch(`${BACKEND_URL}/api/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.status === 401) return logoutUser();
-
-        const data = await res.json();
-        if (res.ok) setUser(data.user);
-        else setUser(null);
-      } catch {
+        const res = await API.get("/api/auth/me");
+        setUser(res.data.user);
+      } catch (err) {
         setUser(null);
+      } finally {
+        setLoading(false);
       }
     };
-
     fetchProfile();
   }, []);
 
+  const registerUser = async (data) => {
+    const res = await API.post("/api/auth/register", data);
+    setUser(res.data.user);
+    return res.data.user;
+  };
+
+  const loginUser = async (data) => {
+    const res = await API.post("/api/auth/login", data);
+    setUser(res.data.user);
+    return res.data.user;
+  };
+
+  const logoutUser = async () => {
+    await API.post("/api/auth/logout");
+    setUser(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, registerUser, loginUser, logout: logoutUser }}>
+    <AuthContext.Provider
+      value={{ user, loading, registerUser, loginUser, logout: logoutUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
