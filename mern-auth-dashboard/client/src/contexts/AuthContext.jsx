@@ -2,7 +2,7 @@ import { createContext, useState, useEffect } from "react";
 
 export const AuthContext = createContext();
 
-const BACKEND_URL = "http://localhost:5023/api";
+const BACKEND_URL = "https://rahulshetye.onrender.com";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
