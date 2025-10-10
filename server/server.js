@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan('dev'));
 
-const CLIENT = process.env.CLIENT_URL || 'https://rahulshetyetask.vercel.app/';
+const CLIENT = process.env.CLIENT_URL || 'https://rahulshetyetask.vercel.app';
 app.use(cors({ origin: CLIENT, credentials: true }));
 
 // Rate limiting
