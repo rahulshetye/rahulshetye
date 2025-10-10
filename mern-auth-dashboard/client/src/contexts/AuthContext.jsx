@@ -7,10 +7,9 @@ const BACKEND_URL = "https://rahulshetye.onrender.com";
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  // --- Register ---
   const registerUser = async (data) => {
     try {
-      const res = await fetch(`${BACKEND_URL}/auth/register`, {
+      const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -25,10 +24,9 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // --- Login ---
   const loginUser = async (data) => {
     try {
-      const res = await fetch(`${BACKEND_URL}/auth/login`, {
+      const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -43,26 +41,24 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // --- Logout ---
   const logoutUser = async () => {
     try {
-      await fetch(`${BACKEND_URL}/auth/logout`, {
+      await fetch(`${BACKEND_URL}/api/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
     } catch (err) {
       console.error("Logout failed:", err);
     } finally {
-      setUser(null); // Clear user state
-      window.location.href = "/login"; // Redirect to login page
+      setUser(null);
+      // window.location.href = "/login"; // optional
     }
   };
 
-  // --- Fetch profile on mount ---
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/auth/me`, {
+        const res = await fetch(`${BACKEND_URL}/api/auth/me`, {
           credentials: "include",
         });
         const data = await res.json();
@@ -81,7 +77,7 @@ export function AuthProvider({ children }) {
         user,
         registerUser,
         loginUser,
-        logout: logoutUser, // use consistent logout naming
+        logout: logoutUser,
       }}
     >
       {children}
