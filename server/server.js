@@ -6,7 +6,6 @@ const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
-const path = require("path");
 
 // Routes
 const authRoutes = require("./routes/auth");
@@ -20,7 +19,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 
-// ✅ CORS configuration
+// CORS configuration
 const allowedOrigins = [
   "http://localhost:5173", // local dev
   "https://rahulshetyetask.vercel.app", // deployed frontend
@@ -35,19 +34,19 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true, // allow cookies
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// Handle preflight requests
-app.options("*", cors());
+// Handle OPTIONS preflight requests properly
+app.options("/api/*", cors());
 
 // Rate limiting
 app.use(rateLimit({ windowMs: 60 * 1000, max: 100 }));
 
-// MongoDB connection
+// Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -56,25 +55,13 @@ mongoose
   .then(() => console.log("Mongo connected"))
   .catch((err) => console.error("Mongo error", err));
 
-// API Routes
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 
-// Optional: Serve React frontend if deployed with backend
-// Uncomment if your React build is in "client/build"
-// app.use(express.static(path.join(__dirname, "client/build")));
-// app.get("*", (req, res) => {
-//   res.sendFile(path.join(__dirname, "client/build", "index.html"));
-// });
-
-// Default route for API root
+// Default route
 app.get("/", (req, res) => {
   res.send("API is running...");
-});
-
-// Catch-all for unknown API routes
-app.all("/api/*", (req, res) => {
-  res.status(404).json({ msg: "API route not found" });
 });
 
 // Global error handler
