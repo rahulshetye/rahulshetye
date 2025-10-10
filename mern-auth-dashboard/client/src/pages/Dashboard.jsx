@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
+import API from "../api";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { format, parseISO } from "date-fns";
 import "../styles/dashboard.css";
@@ -13,11 +14,10 @@ export default function Dashboard() {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/tasks", { credentials: "include" });
-      const data = await res.json();
-      setTasks(data.tasks || []);
+      const res = await API.get("/api/tasks");
+      setTasks(res.data.tasks || []);
     } catch (err) {
-      console.error("Failed to fetch tasks:", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -30,43 +30,30 @@ export default function Dashboard() {
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (!newTask.trim()) return;
-
     try {
-      const res = await fetch("/api/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ title: newTask }),
-      });
-      const data = await res.json();
-      setTasks((prev) => [data.task, ...prev]);
+      const res = await API.post("/api/tasks", { title: newTask });
+      setTasks((prev) => [res.data.task, ...prev]);
       setNewTask("");
     } catch (err) {
-      console.error("Failed to add task:", err);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await fetch(`/api/tasks/${id}`, { method: "DELETE", credentials: "include" });
-      setTasks((prev) => prev.filter((t) => t._id !== id));
-    } catch (err) {
-      console.error("Failed to delete task:", err);
+      console.error(err);
     }
   };
 
   const handleToggle = async (task) => {
     try {
-      const res = await fetch(`/api/tasks/${task._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ completed: !task.completed }),
-      });
-      const data = await res.json();
-      setTasks((prev) => prev.map((t) => (t._id === task._id ? data.task : t)));
+      const res = await API.put(`/api/tasks/${task._id}`, { completed: !task.completed });
+      setTasks((prev) => prev.map((t) => (t._id === task._id ? res.data.task : t)));
     } catch (err) {
-      console.error("Failed to update task:", err);
+      console.error(err);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await API.delete(`/api/tasks/${id}`);
+      setTasks((prev) => prev.filter((t) => t._id !== id));
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -170,7 +157,7 @@ export default function Dashboard() {
             onChange={(e) => setNewTask(e.target.value)}
             placeholder="Task title"
           />
-          <button type="submit">Add</button>
+          <button type="submit">Add Task</button>
         </form>
       </div>
 
