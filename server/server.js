@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
+const path = require("path");
 
 // Routes
 const authRoutes = require("./routes/auth");
@@ -19,10 +20,10 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 
-// ✅ FIXED CORS CONFIG
+// ✅ CORS configuration
 const allowedOrigins = [
-  "http://localhost:5173", // for local dev
-  "https://rahulshetyetask.vercel.app", // your deployed frontend
+  "http://localhost:5173", // local dev
+  "https://rahulshetyetask.vercel.app", // deployed frontend
 ];
 
 app.use(
@@ -34,19 +35,19 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true, // ✅ allow cookies
+    credentials: true, // allow cookies
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// ✅ Explicit OPTIONS handling (for preflight requests)
+// Handle preflight requests
 app.options("*", cors());
 
 // Rate limiting
 app.use(rateLimit({ windowMs: 60 * 1000, max: 100 }));
 
-// MongoDB
+// MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -55,13 +56,25 @@ mongoose
   .then(() => console.log("Mongo connected"))
   .catch((err) => console.error("Mongo error", err));
 
-// Routes
+// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 
-// Default route
+// Optional: Serve React frontend if deployed with backend
+// Uncomment if your React build is in "client/build"
+// app.use(express.static(path.join(__dirname, "client/build")));
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "client/build", "index.html"));
+// });
+
+// Default route for API root
 app.get("/", (req, res) => {
   res.send("API is running...");
+});
+
+// Catch-all for unknown API routes
+app.all("/api/*", (req, res) => {
+  res.status(404).json({ msg: "API route not found" });
 });
 
 // Global error handler
@@ -70,6 +83,6 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message || "Server error" });
 });
 
-// Server start
+// Start server
 const PORT = process.env.PORT || 5023;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
