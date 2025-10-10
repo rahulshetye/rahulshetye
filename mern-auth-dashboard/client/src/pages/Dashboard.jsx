@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { format, parseISO } from "date-fns";
-import "../styles/dashboard.css"; 
+import "../styles/dashboard.css";
 
 export default function Dashboard() {
   const { user, logout } = useContext(AuthContext);
@@ -12,11 +12,11 @@ export default function Dashboard() {
   const [filterCompleted, setFilterCompleted] = useState("all");
   const [loading, setLoading] = useState(true);
 
-  const API_URL = `https://rahulshetye.onrender.com/api/tasks`;
+  const API_URL = "https://rahulshetye.onrender.com/api/tasks";
 
-  // ✅ Get token from localStorage
   const getToken = () => localStorage.getItem("token");
 
+  // --- Fetch tasks ---
   const fetchTasks = async () => {
     setLoading(true);
     try {
@@ -36,9 +36,10 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchTasks();
+    if (getToken()) fetchTasks();
   }, []);
 
+  // --- Add task ---
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (!newTask.trim()) return;
@@ -53,13 +54,14 @@ export default function Dashboard() {
         body: JSON.stringify({ title: newTask }),
       });
       const data = await res.json();
-      setTasks((prev) => [data.task, ...prev]);
+      if (res.ok && data.task) setTasks((prev) => [data.task, ...prev]);
       setNewTask("");
     } catch (err) {
       console.error("Failed to add task:", err);
     }
   };
 
+  // --- Delete task ---
   const handleDelete = async (id) => {
     try {
       await fetch(`${API_URL}/${id}`, {
@@ -72,6 +74,7 @@ export default function Dashboard() {
     }
   };
 
+  // --- Toggle completed ---
   const handleToggle = async (task) => {
     try {
       const res = await fetch(`${API_URL}/${task._id}`, {
@@ -83,19 +86,17 @@ export default function Dashboard() {
         body: JSON.stringify({ completed: !task.completed }),
       });
       const data = await res.json();
-      setTasks((prev) => prev.map((t) => (t._id === task._id ? data.task : t)));
+      if (res.ok && data.task) {
+        setTasks((prev) => prev.map((t) => (t._id === task._id ? data.task : t)));
+      }
     } catch (err) {
       console.error("Failed to update task:", err);
     }
   };
 
   const filteredTasks = tasks
-    .filter((t) => {
-      if (filterCompleted === "completed") return t.completed;
-      if (filterCompleted === "pending") return !t.completed;
-      return true;
-    })
-    .filter((t) => t.title.toLowerCase().includes(search.toLowerCase()));
+    .filter((t) => (filterCompleted === "completed" ? t.completed : filterCompleted === "pending" ? !t.completed : true))
+    .filter((t) => t.title?.toLowerCase().includes(search.toLowerCase()));
 
   const completedCount = tasks.filter((t) => t.completed).length;
   const pendingCount = tasks.filter((t) => !t.completed).length;
@@ -104,8 +105,7 @@ export default function Dashboard() {
     { name: "Completed", value: completedCount },
     { name: "Pending", value: pendingCount },
   ];
-
-  const COLORS = ["#34D399", "#FBBF24"]; 
+  const COLORS = ["#34D399", "#FBBF24"];
 
   const tasksPerDay = () => {
     const map = {};
@@ -115,18 +115,21 @@ export default function Dashboard() {
         map[day] = (map[day] || 0) + 1;
       }
     });
-    return Object.keys(map)
-      .sort()
-      .map((date) => ({ date, completed: map[date] }));
+    return Object.keys(map).sort().map((date) => ({ date, completed: map[date] }));
   };
-
-  const taskTrendData = tasksPerDay();
 
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
         <h1>Dashboard</h1>
-        <button onClick={() => { logout(); localStorage.removeItem("token"); }}>Logout</button>
+        <button
+          onClick={() => {
+            logout();
+            localStorage.removeItem("token");
+          }}
+        >
+          Logout
+        </button>
       </div>
 
       <div className="grid-container">
@@ -158,15 +161,7 @@ export default function Dashboard() {
           <h2>Task Status Pie</h2>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
-              <Pie
-                data={pieData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                label
-              >
+              <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
                 {pieData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
@@ -179,12 +174,7 @@ export default function Dashboard() {
         <div className="chart-card bg-white p-4 rounded-lg shadow mb-6">
           <h2 className="text-xl font-semibold mb-2">Tasks Overview</h2>
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart
-              data={[
-                { name: "Completed", count: completedCount },
-                { name: "Pending", count: pendingCount },
-              ]}
-            >
+            <BarChart data={[{ name: "Completed", count: completedCount }, { name: "Pending", count: pendingCount }]}>
               <XAxis dataKey="name" />
               <YAxis allowDecimals={false} />
               <Tooltip />
@@ -193,10 +183,7 @@ export default function Dashboard() {
                   { name: "Completed", count: completedCount },
                   { name: "Pending", count: pendingCount },
                 ].map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.name === "Completed" ? "#34D399" : "#FBBF24"}
-                  />
+                  <Cell key={`cell-${index}`} fill={entry.name === "Completed" ? "#34D399" : "#FBBF24"} />
                 ))}
               </Bar>
             </BarChart>
@@ -207,12 +194,7 @@ export default function Dashboard() {
       <div className="add-task-card">
         <h2>Add Task</h2>
         <form onSubmit={handleAddTask}>
-          <input
-            type="text"
-            value={newTask}
-            onChange={(e) => setNewTask(e.target.value)}
-            placeholder="Task title"
-          />
+          <input type="text" value={newTask} onChange={(e) => setNewTask(e.target.value)} placeholder="Task title" />
           <button type="submit">Add</button>
         </form>
       </div>
@@ -222,9 +204,7 @@ export default function Dashboard() {
           <li key={task._id} className={task.completed ? "task-completed" : "task-pending"}>
             <div className="task-title">{task.title}</div>
             <div className="task-actions">
-              <button onClick={() => handleToggle(task)}>
-                {task.completed ? "Turn Pending" : "Turn Complete"}
-              </button>
+              <button onClick={() => handleToggle(task)}>{task.completed ? "Turn Pending" : "Turn Complete"}</button>
               <button onClick={() => handleDelete(task._id)}>Delete</button>
             </div>
           </li>

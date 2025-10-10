@@ -2,24 +2,23 @@ import { createContext, useState, useEffect } from "react";
 
 export const AuthContext = createContext();
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://rahulshetye.onrender.com';
-console.log("Backend URL:", import.meta.env.VITE_API_URL);
-
-
+const BACKEND_URL = import.meta.env.VITE_API_URL || "https://rahulshetye.onrender.com";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
+  // --- Register user ---
   const registerUser = async (data) => {
     try {
       const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-        credentials: "include",
       });
       const result = await res.json();
       if (!res.ok) throw result;
+      // Save token
+      localStorage.setItem("token", result.token);
       setUser(result.user);
       return result;
     } catch (err) {
@@ -27,32 +26,41 @@ export function AuthProvider({ children }) {
     }
   };
 
-const loginUser = async (data) => {
-  const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  const result = await res.json();
-  if (!res.ok) throw result;
+  // --- Login user ---
+  const loginUser = async (data) => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json();
+      if (!res.ok) throw result;
 
-  // Save token for later requests
-  localStorage.setItem("token", result.token);
-  setUser(result.user);
-  return result;
-};
+      // Save token for future requests
+      localStorage.setItem("token", result.token);
+      setUser(result.user);
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  };
 
-const logoutUser = async () => {
-  localStorage.removeItem("token");
-  setUser(null);
-};
+  // --- Logout user ---
+  const logoutUser = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+  };
 
-
+  // --- Fetch user profile on mount ---
   useEffect(() => {
     const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return setUser(null);
+
       try {
         const res = await fetch(`${BACKEND_URL}/api/auth/me`, {
-          credentials: "include",
+          headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
         if (res.ok && data.user) setUser(data.user);
@@ -61,6 +69,7 @@ const logoutUser = async () => {
         setUser(null);
       }
     };
+
     fetchProfile();
   }, []);
 
