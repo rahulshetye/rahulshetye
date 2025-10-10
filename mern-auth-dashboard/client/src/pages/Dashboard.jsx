@@ -12,7 +12,8 @@ export default function Dashboard() {
   const [filterCompleted, setFilterCompleted] = useState("all");
   const [loading, setLoading] = useState(true);
 
-  const API_URL = "http://localhost:5023/api/tasks";
+  const API_URL = `${import.meta.env.VITE_API_URL}/api/tasks`;
+
 
   const fetchTasks = async () => {
     setLoading(true);
