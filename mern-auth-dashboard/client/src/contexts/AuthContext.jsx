@@ -2,7 +2,10 @@ import { createContext, useState, useEffect } from "react";
 
 export const AuthContext = createContext();
 
-const BACKEND_URL = "https://rahulshetye.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://rahulshetye.onrender.com';
+console.log("Backend URL:", import.meta.env.VITE_API_URL);
+
+
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
