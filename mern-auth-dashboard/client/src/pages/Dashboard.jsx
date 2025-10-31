@@ -73,101 +73,124 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container">
+  {/* Header */}
+  <div className="dashboard-header">
+    <h1>✨ Dashboard Overview</h1>
+    <button onClick={logout}>Logout</button>
+  </div>
 
-      {/* Header */}
-      <div className="dashboard-header">
-        <h1>Dashboard</h1>
-        <button onClick={logout}>Logout</button>
+  {/* Profile + Stats Grid */}
+  <div className="grid-container">
+    {/* Profile Card */}
+    <div className="profile-card">
+      <div className="avatar">
+        <img
+          src={`https://ui-avatars.com/api/?name=${user?.name}&background=random`}
+          alt="avatar"
+        />
       </div>
-
-      {/* Profile + Stats Grid */}
-      <div className="grid-container">
-        <div className="profile-card">
-          <div className="avatar">
-            <img src={`https://ui-avatars.com/api/?name=${user?.name}`} alt="avatar" />
-          </div>
-          <h2>{user?.name}</h2>
-          <p>{user?.email}</p>
-          <p className="welcome-text">Welcome back!</p>
-        </div>
-
-        <div className="stat-card total-tasks">
-          <h2>Total Tasks</h2>
-          <p>{tasks.length}</p>
-        </div>
-        <div className="stat-card completed-tasks">
-          <h2>Completed</h2>
-          <p>{completedCount}</p>
-        </div>
-        <div className="stat-card pending-tasks">
-          <h2>Pending</h2>
-          <p>{pendingCount}</p>
-        </div>
-      </div>
-
-      {/* Charts */}
-      <div className="charts-grid">
-        {/* Pie Chart */}
-        <div className="chart-card">
-          <h2>Task Status Pie</h2>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Bar Chart */}
-        <div className="chart-card">
-          <h2>Task Status Overview</h2>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={barData}>
-              <XAxis dataKey="name" />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="count">
-                {barData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Add Task */}
-      <div className="add-task-card">
-        <h2>Add Task</h2>
-        <form onSubmit={handleAddTask}>
-          <input
-            type="text"
-            value={newTask}
-            onChange={(e) => setNewTask(e.target.value)}
-            placeholder="Task title"
-          />
-          <button type="submit">Add Task</button>
-        </form>
-      </div>
-
-      {/* Task List */}
-      <ul className="task-list">
-        {tasks.map((task) => (
-          <li key={task._id} className={task.completed ? "task-completed" : "task-pending"}>
-            <div className="task-title">{task.title}</div>
-            <div className="task-actions">
-              <button onClick={() => handleToggle(task)}>
-                {task.completed ? "Turn Pending" : "Turn Complete"}
-              </button>
-              <button onClick={() => handleDelete(task._id)}>Delete</button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <h2>{user?.name}</h2>
+      <p>{user?.email}</p>
+      <p className="welcome-text">Welcome back 👋 Let’s get productive!</p>
     </div>
+
+    {/* Stats */}
+    <div className="stat-card total-tasks">
+      <h2>Total Tasks</h2>
+      <p>{tasks.length}</p>
+    </div>
+
+    <div className="stat-card completed-tasks">
+      <h2>Completed</h2>
+      <p>{completedCount}</p>
+    </div>
+
+    <div className="stat-card pending-tasks">
+      <h2>Pending</h2>
+      <p>{pendingCount}</p>
+    </div>
+  </div>
+
+  {/* Charts */}
+  <div className="charts-grid">
+    <div className="chart-card">
+      <h2>📊 Task Status Pie</h2>
+      <ResponsiveContainer width="100%" height={250}>
+        <PieChart>
+          <Pie
+            data={pieData}
+            dataKey="value"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            outerRadius={80}
+            label
+          >
+            {pieData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+
+    <div className="chart-card">
+      <h2>📈 Task Status Overview</h2>
+      <ResponsiveContainer width="100%" height={250}>
+        <BarChart data={barData}>
+          <XAxis dataKey="name" />
+          <YAxis allowDecimals={false} />
+          <Tooltip />
+          <Bar dataKey="count">
+            {barData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+
+  {/* Add Task */}
+  <div className="add-task-card">
+    <h2>➕ Add a New Task</h2>
+    <form onSubmit={handleAddTask}>
+      <input
+        type="text"
+        value={newTask}
+        onChange={(e) => setNewTask(e.target.value)}
+        placeholder="Enter a new task..."
+      />
+      <button type="submit">Add Task</button>
+    </form>
+  </div>
+
+  {/* Task List */}
+  <ul className="task-list">
+    {tasks.length === 0 ? (
+      <p className="text-center text-gray-500 italic">No tasks yet. Add one above!</p>
+    ) : (
+      tasks.map((task) => (
+        <li
+          key={task._id}
+          className={`${task.completed ? "task-completed" : "task-pending"} hover:shadow-xl`}
+        >
+          <div className="task-title flex items-center justify-between">
+            <span>{task.title}</span>
+            {task.completed && <span className="text-sm opacity-80">✅ Done</span>}
+          </div>
+          <div className="task-actions">
+            <button onClick={() => handleToggle(task)}>
+              {task.completed ? "Mark Pending" : "Mark Complete"}
+            </button>
+            <button onClick={() => handleDelete(task._id)}>Delete</button>
+          </div>
+        </li>
+      ))
+    )}
+  </ul>
+</div>
+
   );
 }
