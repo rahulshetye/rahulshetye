@@ -4,119 +4,119 @@
 
 /* Dashboard Container */
 .dashboard-container {
-  @apply min-h-screen bg-gray-100 p-6;
+  @apply min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-slate-200 p-6 font-sans;
 }
 
 /* Header */
 .dashboard-header {
-  @apply flex justify-between items-center mb-6 bg-white shadow p-4 rounded-lg;
+  @apply flex justify-between items-center mb-8 bg-white/70 backdrop-blur-md shadow-md p-5 rounded-2xl border border-white/50;
 }
 .dashboard-header h1 {
-  @apply text-3xl font-bold text-blue-600;
+  @apply text-3xl font-extrabold text-blue-700 tracking-tight;
 }
 .dashboard-header button {
-  @apply bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition;
+  @apply bg-gradient-to-r from-red-500 to-pink-600 text-white px-5 py-2.5 rounded-xl hover:scale-105 transition-transform shadow-md hover:shadow-lg;
 }
 
 /* Grid for profile + stats */
 .grid-container {
-  @apply grid grid-cols-1 md:grid-cols-4 gap-4 mb-6;
+  @apply grid grid-cols-1 md:grid-cols-4 gap-6 mb-8;
 }
 
 /* Profile Card */
 .profile-card {
-  @apply bg-white rounded-lg shadow p-4 flex flex-col items-center text-center;
+  @apply bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl shadow-md p-6 flex flex-col items-center text-center transition-transform hover:scale-105;
 }
 .profile-card .avatar {
-  @apply w-24 h-24 rounded-full overflow-hidden mb-3;
+  @apply w-24 h-24 rounded-full overflow-hidden mb-3 ring-4 ring-blue-200;
 }
 .profile-card .avatar img {
   @apply w-full h-full object-cover;
 }
 .profile-card h2 {
-  @apply text-xl font-semibold;
+  @apply text-xl font-semibold text-gray-800;
 }
 .profile-card p {
   @apply text-gray-500;
 }
 .profile-card .welcome-text {
-  @apply mt-2 text-sm text-gray-400;
+  @apply mt-2 text-sm text-gray-400 italic;
 }
 
 /* Stats Cards */
 .stat-card {
-  @apply text-white p-4 rounded-lg shadow flex flex-col items-center justify-center;
+  @apply text-white p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center transform hover:scale-105 transition-all;
 }
 .total-tasks {
-  @apply bg-gradient-to-r from-blue-500 to-indigo-600;
+  @apply bg-gradient-to-br from-blue-500 to-indigo-600;
 }
 .completed-tasks {
-  @apply bg-gradient-to-r from-green-400 to-green-600;
+  @apply bg-gradient-to-br from-green-400 to-emerald-600;
 }
 .pending-tasks {
-  @apply bg-gradient-to-r from-yellow-400 to-yellow-600;
+  @apply bg-gradient-to-br from-amber-400 to-orange-600;
 }
 .stat-card h2 {
-  @apply text-xl font-semibold;
+  @apply text-lg font-medium opacity-90;
 }
 .stat-card p {
-  @apply text-3xl font-bold mt-2;
+  @apply text-4xl font-extrabold mt-2;
 }
 
 /* Charts Grid */
 .charts-grid {
-  @apply grid grid-cols-1 md:grid-cols-2 gap-6 mb-6;
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6 mb-8;
 }
 .chart-card {
-  @apply bg-white rounded-lg shadow p-4;
+  @apply bg-white/70 backdrop-blur-md border border-white/50 rounded-2xl shadow-md p-6 transition hover:shadow-xl;
 }
 .chart-card h2 {
-  @apply text-xl font-semibold mb-2;
+  @apply text-xl font-semibold mb-3 text-gray-700;
 }
 
 /* Add Task Card */
 .add-task-card {
-  @apply bg-white rounded-lg shadow p-4 mb-6;
+  @apply bg-white/70 backdrop-blur-md border border-white/50 rounded-2xl shadow-md p-6 mb-8;
 }
 .add-task-card h2 {
-  @apply text-xl font-semibold mb-2;
+  @apply text-xl font-semibold mb-3 text-gray-700;
 }
 .add-task-card form {
-  @apply flex gap-2;
+  @apply flex flex-col md:flex-row gap-3;
 }
 .add-task-card input {
-  @apply flex-1 p-2 border rounded;
+  @apply flex-1 p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition;
 }
 .add-task-card button {
-  @apply bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition;
+  @apply bg-gradient-to-r from-green-500 to-teal-600 text-white px-5 py-2.5 rounded-xl hover:scale-105 transition-transform shadow-md;
 }
 
 /* Task List */
 .task-list {
-  @apply space-y-3;
+  @apply space-y-4;
 }
 .task-list li {
-  @apply p-3 rounded shadow flex flex-col transition hover:scale-[1.02] duration-300;
+  @apply p-4 rounded-2xl shadow-md flex flex-col transition-all hover:scale-[1.02] hover:shadow-xl duration-300;
 }
-/* Map JSX class names to Tailwind styles */
+/* Task States */
 .task-completed {
   @apply bg-gradient-to-r from-green-400 to-green-600 text-white;
 }
 .task-pending {
-  @apply bg-gradient-to-r from-yellow-300 to-yellow-500 text-black;
+  @apply bg-gradient-to-r from-yellow-300 to-orange-500 text-black;
 }
 .task-title {
-  @apply font-semibold px-2 py-1 rounded-t;
+  @apply font-semibold text-lg px-2 py-1 rounded-t;
 }
 .task-actions {
-  @apply mt-2 flex gap-2;
+  @apply mt-3 flex gap-3;
 }
 .task-actions button {
-  @apply px-3 py-1 rounded text-white font-semibold transition hover:opacity-80;
+  @apply px-4 py-1.5 rounded-lg text-white font-semibold transition hover:opacity-90;
 }
 .task-actions button:first-child {
-  @apply bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800;
+  @apply bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700;
 }
 .task-actions button:last-child {
-  @apply bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800;
+  @apply bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700;
 }
